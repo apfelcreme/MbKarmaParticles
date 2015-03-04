@@ -1,0 +1,19 @@
+name: MbKarmaParticles
+version: 2.0
+main: io.github.apfelcreme.MbKarmaParticles.MbKarmaParticles
+softdepend: [VanishNoPacket]
+
+commands:
+   particles:
+      description: Does particle stuff 
+      usage: 
+      permission: 
+      permission-message:
+            
+permissions: 
+  MbKarmaParticles.*:
+    description: All
+    children: 
+      MbKarmaParticles.reload: true
+  MbKarmaParticles.reload:
+    description: Reload Config
