@@ -1,11 +1,12 @@
 package io.github.apfelcreme.MbKarmaParticles;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Effect;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.kitteh.vanish.VanishPlugin;
 
 /**
  * MbKarmaParticles 
@@ -29,9 +30,8 @@ import org.kitteh.vanish.VanishPlugin;
  */
 public class MbKarmaParticles extends JavaPlugin {
 	
-	private VanishPlugin pluginVanishNoPacket;
-	
-	private HashMap<Player, ParticleCloud> particleClouds;
+	private HashMap<Effect, ParticleGroupTask> particleGroupTasks;
+	private HashMap<Player, ParticleCloud> vanishedPlayers;
 	
 	public static MbKarmaParticles getInstance() {
 		return (MbKarmaParticles) Bukkit.getServer().getPluginManager()
@@ -40,26 +40,46 @@ public class MbKarmaParticles extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		particleClouds = new HashMap<Player, ParticleCloud>();
+		particleGroupTasks = new HashMap<Effect, ParticleGroupTask>();
+		vanishedPlayers = new HashMap<Player, ParticleCloud>();
 		getServer().getPluginManager().registerEvents(new PlayerQuitListener(),
 				this);
 		Bukkit.getMessenger().registerIncomingPluginChannel(this, "Karma", new BungeeMessageListener());
+		Bukkit.getMessenger().registerOutgoingPluginChannel(this, "Karma");
+		
 		if (getServer().getPluginManager().getPlugin("VanishNoPacket") != null) {
-			pluginVanishNoPacket = (VanishPlugin) getServer().getPluginManager().getPlugin("VanishNoPacket");
-		} 
+			getServer().getPluginManager().registerEvents(new PlayerVanishListener(), this);
+		} else {
+			getLogger().severe("Plugin VanishNoPacket nicht gefunden!");
+		}
 	}
 	
-	/**
-	 * @return the pluginVanishNoPacket
-	 */
-	public VanishPlugin getPluginVanishNoPacket() {
-		return pluginVanishNoPacket;
-	}
 
 	/**
 	 * @return the particleClouds
 	 */
-	public HashMap<Player, ParticleCloud> getParticleClouds() {
-		return particleClouds;
+	public HashMap<Effect, ParticleGroupTask> getParticleGroupTasks() {
+		return particleGroupTasks;
+	}
+
+	/**
+	 * @return the vanishedPlayers
+	 */
+	public HashMap<Player, ParticleCloud> getVanishedPlayers() {
+		return vanishedPlayers;
+	}
+	
+	/**
+	 * returns a ParticleCloud attatched to a player if there is one
+	 * @param player
+	 * @return
+	 */
+	public ParticleCloud getParticleCloud(Player player) {
+		for (Entry<Effect, ParticleGroupTask> e: particleGroupTasks.entrySet()) {
+			if (e.getValue().getParticleClouds().containsKey(player)) {
+				return e.getValue().getParticleClouds().get(player);
+			}
+		}
+		return null;
 	}
 }
